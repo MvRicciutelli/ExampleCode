@@ -1,0 +1,2515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="6.1.1" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+ <framework name="qpcpp"/>
+ <package name="AOs" stereotype="0x02" namespace="AO">
+  <class name="AO_ESP32C" superclass="qpcpp::QActive">
+   <attribute name="m_timeEvt" type="QP::QTimeEvt" visibility="0x00" properties="0x00">
+    <documentation>///@brief internal timing event object</documentation>
+   </attribute>
+   <attribute name="m_incomingDataCheckTimeEvt" type="QP::QTimeEvt" visibility="0x00" properties="0x00">
+    <documentation>///@brief internal timing event object to periodically check incoming data</documentation>
+   </attribute>
+   <attribute name="m_unsolicitedTimeEvt" type="QP::QTimeEvt" visibility="0x00" properties="0x00">
+    <documentation>///@brief internal timing event object to timeout unsolicited messages</documentation>
+   </attribute>
+   <attribute name="m_connectionCheckTimeEvt" type="QP::QTimeEvt" visibility="0x00" properties="0x00">
+    <documentation>///@brief internal timer to periodically check connection status</documentation>
+   </attribute>
+   <attribute name="init" type="ESP32C_Init_t" visibility="0x02" properties="0x00">
+    <documentation>///@biref init structure</documentation>
+   </attribute>
+   <attribute name="mode" type="DRV::ESP32C3::WiFiMode" visibility="0x02" properties="0x00">
+    <documentation>///@brief esp32c operating mode (ap, station or both)</documentation>
+   </attribute>
+   <attribute name="rx_buffer[ESP32C_TX_BUFFER_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ssid[SSID_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief  connection to a wifi network ssid buffer</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="pwd[PWD_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief external wifi network password buffer</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="hotspot_ssid[SSID_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief generated hotspot ssid buffer</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="hotspot_pwd[PWD_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief generated hotspot password buffer</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="hotspot_encryption" type="DRV::ESP32C3::WifiEncryption" visibility="0x02" properties="0x00"/>
+   <attribute name="hotspot_max_conn" type="uint8_t" visibility="0x02" properties="0x00"/>
+   <attribute name="hotspot_hidden" type="bool" visibility="0x02" properties="0x00">
+    <documentation>///@brief hotspot generated to be hidden or not</documentation>
+    <code>= false;</code>
+   </attribute>
+   <attribute name="hotspot_channel_id" type="DRV::ESP32C3::WifiChannelIds" visibility="0x02" properties="0x00">
+    <documentation>///@brief channel id for hotspot mode</documentation>
+   </attribute>
+   <attribute name="error_counter" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@counter of errors </documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="remote_address[ADDRESS_LEN_MAX]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief remote url or ip buffer for socket connection</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="remote_port" type="uint16_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief remote port buffer for socket connection</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="client_link_id" type="DRV::ESP32C3::LinkId" visibility="0x02" properties="0x00">
+    <documentation>active connection link id</documentation>
+    <code>= DRV::ESP32C3::LinkId1;</code>
+   </attribute>
+   <attribute name="commandParseResult" type="bool" visibility="0x02" properties="0x00">
+    <documentation>///@brief buffer to preserve parsing result of at command responses</documentation>
+    <code>= false;</code>
+   </attribute>
+   <attribute name="send_data_length" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief buffers data length info for data transmission</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="send_data_buffer[ESP32C_TX_BUFFER_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief stores data to be sent via wifi</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="receive_data_max_length" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief store the maximum data requested in bytes</documentation>
+    <code> = 0;</code>
+   </attribute>
+   <attribute name="receive_data_buffer_ptr" type="uint8_t*" visibility="0x02" properties="0x00">
+    <documentation>///@brief received data from wifi shall be copied into the memory location pointed by this pointer</documentation>
+    <code>= nullptr;</code>
+   </attribute>
+   <attribute name="user_timeout_ms" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief user provided timeout value buffer in milliseconds</documentation>
+    <code> = 0;</code>
+   </attribute>
+   <attribute name="rx_data_length" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief counter used to memorize the amount of data stored in rx_buffer, so data received by the module via uart</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="client_close_id" type="DRV::ESP32C3::LinkId" visibility="0x02" properties="0x00">
+    <documentation>///@brief hold the link id to be closed</documentation>
+    <code>= DRV::ESP32C3::LinkId0;</code>
+   </attribute>
+   <attribute name="server_port" type="uint16_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief buffer for server port open to connection</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="socket_status[DRV::ESP32C3::LinkIdMax]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief array of socket statuses 0-&gt; disconnected 1-&gt; connected</documentation>
+    <code>= {ESP32C_SOCKET_STATUS_CLOSE};</code>
+   </attribute>
+   <attribute name="unsolicited_msg_flag" type="bool" visibility="0x02" properties="0x00">
+    <documentation>///@brief flag that indicates the ongoing reception of an unsolicited message</documentation>
+    <code>= false;</code>
+   </attribute>
+   <attribute name="server_max_connections" type="uint8_t " visibility="0x02" properties="0x00">
+    <documentation>///@brief maixmum number of simultaneous connections in server mode</documentation>
+    <code>= 1;</code>
+   </attribute>
+   <attribute name="ws_ping_interval_s" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief ping interval parameter used to configure websockets in seconds</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_ping_timeout_s" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief ping timeout parameter used to configure websockets in seconds</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_header[ESP32C3_WS_HEADER_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief  current header to be used in the next websocket connection</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_header_len" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief current header length in bytes</documentation>
+    <code> = 0;</code>
+   </attribute>
+   <attribute name="ws_uri[ESP32C_URI_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief buffer for uri address</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_opcode" type="DRV::ESP32C3::WebSockedtOpCode_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief  opcode for next websocket operation</documentation>
+    <code>= DRV::ESP32C3::WebSockedtOpCode_t::ContinuationFrame;</code>
+   </attribute>
+   <attribute name="ws_uri_len" type="uint32_t" visibility="0x00" properties="0x00">
+    <documentation>///@brief bytes composing the next uri to be used in a websocket open query</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="timeout_counter" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief counts timeout, no response from the module, if the number of consecutive timeouts exceeds  the limit, the ao  triggers a callback</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_cfg_done[ESP32C3_MAX_WS_SOCKET]" type="bool" visibility="0x02" properties="0x00">
+    <documentation>///@brief signals whther websocket at configuration is already established</documentation>
+    <code> = {0};</code>
+   </attribute>
+   <attribute name="ws_auth[ESP32C_URI_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief autorization parameter buffer for websocket</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_auth_len" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief current auth parameter length</documentation>
+    <code> = 0;</code>
+   </attribute>
+   <attribute name="ws_sub_protocol[ESP32C_URI_MAX_LEN]" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief string defining websocket sub protocol</documentation>
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_sub_protocol_len" type="uint16_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief number of bytes of the sub prootocol parameter string</documentation>
+    <code> = 0;</code>
+   </attribute>
+   <attribute name="udp_local_port" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief holds the port value used for udp listening</documentation>
+    <code> = 0;</code>
+   </attribute>
+   <attribute name="udp_remote_port" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>///@brief stores the upd remote port for udp connections</documentation>
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="idle_flag" type="bool" visibility="0x02" properties="0x00">
+    <documentation>///@brief indicates we are in  idle state</documentation>
+    <code>= false;</code>
+   </attribute>
+   <attribute name="hotspot_active" type="bool" visibility="0x02" properties="0x00">
+    <documentation>///@brief signals that the hotspot  mode is on</documentation>
+    <code>= false;</code>
+   </attribute>
+   <operation name="AO_ESP32C" type="" visibility="0x00" properties="0x00">
+    <documentation>Blinky constructor</documentation>
+    <parameter name="_init" type="ESP32C_Init_t&amp;"/>
+    <code>  : QActive(Q_STATE_CAST(&amp;AO_ESP32C::initial)),
+    m_timeEvt(this, TIMEOUT_SIG, 0U),
+    init(_init),
+    m_unsolicitedTimeEvt(this, ESP32C_UNSOLICITED_TIMEOUT_SIG, 0U),
+    m_incomingDataCheckTimeEvt(this, ESP32C_DATA_RECEIVE_CHECK_SIG, 0U),
+    m_connectionCheckTimeEvt(this, ESP32C_CONNECTION_CHECK_SIG, 0U)
+</code>
+   </operation>
+   <operation name="Begin" type="void" visibility="0x00" properties="0x00">
+    <parameter name="_mode" type="DRV::ESP32C3::WiFiMode"/>
+    <parameter name="caller" type="void*"/>
+    <code>AO_ESP32C_StartEvent *evt = Q_NEW(AO_ESP32C_StartEvent, ESP32C_START_SIG);
+evt-&gt;mode = _mode;
+this-&gt;POST(evt,caller);</code>
+   </operation>
+   <operation name="ReceiveCompleteCallback" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**@brief process hardware event callback data  obtained from uart communication
+*@parm event type
+*@param caller object
+*@param data payload
+*/</documentation>
+    <parameter name="event" type="DRV::ESP32C3::Event "/>
+    <parameter name="caller" type="DRV::ESP32C3* "/>
+    <parameter name="data" type="uint8_t* "/>
+    <code>// check event type
+if(event == DRV::ESP32C3::Event::RespReceived)
+{
+    // copy data to buffer
+    uint32_t len =strnlen((char*)data, sizeof(rx_buffer));
+    if(len&gt; sizeof(rx_buffer))
+    {
+        len = sizeof(rx_buffer);
+    }
+    memcpy(rx_buffer, data, len);
+    rx_buffer[len] = 0;
+    QP::QEvt *evt = Q_NEW(QP::QEvt, ESP32C_OK_SIG);
+    this-&gt;POST(evt,caller);
+    
+}else if( event == DRV::ESP32C3::Event::RespErr )
+{
+    QP::QEvt *evt = Q_NEW(QP::QEvt, ESP32C_ERR_SIG);
+    this-&gt;POST(evt,caller);
+}
+</code>
+   </operation>
+   <operation name="WiFiConnect" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief initiate connection procedure to a wifi via ssdi and password
+*@parm ssid string
+*@param password string
+*@param caller object
+*/</documentation>
+    <parameter name="_ssid" type="const uint8_t*"/>
+    <parameter name="_pwd" type="const uint8_t*"/>
+    <parameter name="caller" type="void*"/>
+    <code>// copy wifi credential into the internal buffer
+strncpy((char*)ssid,(const char*)_ssid, sizeof(ssid));
+strncpy((char*)pwd ,(const char*)_pwd , sizeof(pwd));
+// send ESP32_CONNECT_WIFI_SIG
+#if !Q_UTEST  // in unit test mode just buffer the input parameters
+    QEvt *evt = Q_NEW(QEvt, ESP32C_CONNECT_WIFI_SIG);
+    this-&gt;POST(evt,caller);
+#else
+// do nothing
+#endif</code>
+   </operation>
+   <operation name="WiFiHotspotOpen" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+@brief  sends a requesto to the active object to configure  a esp32c hotspot
+@param ssid of the wifi
+@param password
+@param  connection channel used in the esp32c
+@param encryption type adopted by the esp32c
+@param maximum number of connections
+@param should the ssid hidden
+@param reference to caller object
+*/</documentation>
+    <parameter name="_ssid" type="const uint8_t*"/>
+    <parameter name="_pwd" type="const uint8_t*"/>
+    <parameter name="_channel_id" type="DRV::ESP32C3::WifiChannelIds"/>
+    <parameter name="_encryption" type="DRV::ESP32C3::WifiEncryption"/>
+    <parameter name="_max_conn" type="uint8_t"/>
+    <parameter name="_hidden" type="bool"/>
+    <parameter name="caller" type="void*"/>
+    <code>// copy hotspot settings into internal buffers
+strncpy((char*)hotspot_ssid,(const char*)_ssid, sizeof(hotspot_ssid));
+strncpy((char*)hotspot_pwd ,(const char*)_pwd , sizeof(hotspot_pwd));
+hotspot_channel_id = _channel_id;
+hotspot_encryption = _encryption;
+hotspot_hidden     = _hidden;
+hotspot_max_conn   = _max_conn;
+#if !Q_UTEST  // in unit test mode just buffer the input parameters
+    // send ESP32C_HOTSPOT_CONF_SIG
+    QEvt *evt = Q_NEW(QEvt, ESP32C_HOTSPOT_CONFIG_SIG);
+    this-&gt;POST(evt,caller);
+#endif</code>
+   </operation>
+   <operation name="TcpOpenSocket" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief  sends a requesto to open a tcp socket to         *       a remote address
+*@param  strting address or ip address
+*@param  number port
+*@param caller object for qp tracing
+*/</documentation>
+    <parameter name="address" type="const uint8_t*"/>
+    <parameter name="port" type="uint16_t"/>
+    <parameter name="caller" type="void*"/>
+    <code>if( address == nullptr || strnlen((char*)address, sizeof(remote_address))&gt;= sizeof(remote_address))
+{
+    TRACE_AO_ESP32C(&quot;TcpErrInput&quot;);
+    AO_ESP32C_TcpSocketOpenCallback(this, false, client_link_id );
+}
+else{
+    // create event
+    OpenTcpSocketEvt *evt = Q_NEW(OpenTcpSocketEvt, ESP32C_TCP_CONNECT_SIG);
+    evt-&gt;port = port;
+    strncpy((char*)evt-&gt;address,(const char*)address, sizeof(remote_address));
+/* Send the ESP32C_TCP_CONNECT_SIG*/
+#if !Q_UTEST // in unit test mode just buffer the input parameters
+    // send the event
+    this-&gt;POST(evt,caller);
+#endif
+}</code>
+   </operation>
+   <operation name="SendData" type="bool" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief Trigger transmisison of data via socket *(previously opened)
+*@param data pointer
+*@param length in bytes
+*@param socket id to be used
+*@param caller object for qp tracing
+*/</documentation>
+    <parameter name="data" type="const uint8_t*"/>
+    <parameter name="length" type="uint32_t"/>
+    <parameter name="_socket_id" type="DRV::ESP32C3::LinkId"/>
+    <parameter name="caller" type="void*"/>
+    <code>bool retVal = true;
+if( length &lt;= sizeof(send_data_buffer)
+    &amp;&amp; _socket_id&lt; DRV::ESP32C3::LinkId::LinkIdMax
+    &amp;&amp; (socket_status[_socket_id] == ESP32C_SOCKET_STATUS_SERVER_OPEN
+        || socket_status[_socket_id] == ESP32C_SOCKET_STATUS_OPEN))
+{
+
+#if !Q_UTEST // in unit test mode just buffer the input parameters
+/// EVENT CREATION
+    SendDataEvt *evt = Q_NEW(SendDataEvt, ESP32C_SEND_DATA_SIG);
+    memcpy(evt-&gt;data, data, length);
+    evt-&gt;length = length;
+    evt-&gt;socket_id = _socket_id;
+    this-&gt;POST(evt,caller);
+////
+#endif
+}else //&lt;-- socket not opened OR size exceeded
+{
+    TRACE_AO_ESP32C(&quot;SNDERR_%d_Sock%d&quot;, length, (uint8_t)socket_status[_socket_id]);
+    retVal = false;
+#if !Q_UTEST
+    AO_ESP32C_SendDataCallback(this, false, _socket_id);
+#endif
+}
+return retVal;</code>
+   </operation>
+   <operation name="ReadData" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief Receive and read data from an open connection
+*@param pointer where data shall be stored
+*@param  max data length
+*@param timeout in ms
+*@param caller object for qp tracing
+*/</documentation>
+    <parameter name="receive_buffer" type="uint8_t*"/>
+    <parameter name="max_length" type="uint32_t"/>
+    <parameter name="timeout_ms" type="uint32_t"/>
+    <parameter name="caller" type="void*"/>
+    <code>receive_data_buffer_ptr = receive_buffer;
+receive_data_max_length = max_length;
+user_timeout_ms = timeout_ms;
+TRACE_AO_ESP32C(&quot;StartRead %d,%d&quot;, max_length, timeout_ms);
+#if !Q_UTEST // in unit test mode just buffer the input parameters
+    // send ESP32C_HOTSPOT_CONF_SIG
+    QEvt *evt = Q_NEW(QEvt, ESP32C_READ_DATA_SIG);
+    this-&gt;POST(evt,caller);
+#endif</code>
+   </operation>
+   <operation name="TcpCloseSocket" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief closes a previously opened tcp socket
+*@param link id of the socket
+*@param caller object for qp tracing
+*/</documentation>
+    <parameter name="socket_id" type="DRV::ESP32C3::LinkId"/>
+    <parameter name="caller" type="void*"/>
+    <code>
+
+#if ! Q_UTEST
+// create event
+    CloseSocketEvt *evt = Q_NEW(CloseSocketEvt, ESP32C_CLOSE_SOCKET_SIG);
+    evt-&gt;socket_id = socket_id;
+    this-&gt;POST(evt, this);
+#endif</code>
+   </operation>
+   <operation name="OpenServer" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief issue request to open a  server on the desired port
+*@param port number
+*@param caller object for qp tracing
+*@param maximum number of simultaneous supported connections
+*/</documentation>
+    <parameter name="port" type="uint16_t"/>
+    <parameter name="caller" type="void*"/>
+    <parameter name="_server_max_connections" type="uint8_t"/>
+    <code>// buffer server port
+server_port = port;
+server_max_connections = _server_max_connections;
+#if !Q_UTEST  // in unit test mode just buffer the input parameters
+    // send ESP32C_OPEN_SERVER_SIG
+    QEvt *evt = Q_NEW(QEvt, ESP32C_OPEN_SERVER_SIG);
+    this-&gt;POST(evt,caller);
+#endif</code>
+   </operation>
+   <operation name="GetFreeSocketId" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/**
+*@brief retrieve the first unoccupied socket id
+*@param return value pointer
+*@return 1-&gt; found 0-&gt; not found
+*/</documentation>
+    <parameter name="startOutput_socketId" type="DRV::ESP32C3::LinkId*"/>
+    <code>uint8_t retVal = 0;
+for( uint8_t id = (uint8_t)(*startOutput_socketId);
+     id&lt;(uint8_t)DRV::ESP32C3::LinkIdMax;
+     id++)
+{
+    if(socket_status[id] == ESP32C_SOCKET_STATUS_CLOSE)
+    {
+        /* unopened socket found */
+        retVal = 1;
+        *startOutput_socketId = (DRV::ESP32C3::LinkId)id;
+        TRACE_AO_ESP32C(&quot;GotId%d&quot;, id);
+        break;
+    }
+}
+
+if(!retVal)
+{
+    TRACE_AO_ESP32C(&quot;ID_GET_FAI&quot;);
+}
+
+return retVal;</code>
+   </operation>
+   <operation name="GetFreeWsSocketId" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/**
+*@brief retrieve the first unoccupied websocket socket id
+*@param return value pointer
+*@return 1-&gt; found 0-&gt; not found
+*/</documentation>
+    <parameter name="startOutput_socketId" type="DRV::ESP32C3::LinkId*"/>
+    <code>uint8_t retVal = 0;
+for( uint8_t id = (uint8_t)(*startOutput_socketId);
+     id&lt;ESP32C3_MAX_WS_SOCKET;
+     id++)
+{
+    if(socket_status[id] == ESP32C_SOCKET_STATUS_CLOSE)
+    {
+        /* unopened socket found */
+        retVal = 1;
+        *startOutput_socketId = (DRV::ESP32C3::LinkId)id;
+        TRACE_AO_ESP32C(&quot;GotId%d&quot;, id);
+        break;
+    }
+}
+
+if(!retVal)
+{
+    TRACE_AO_ESP32C(&quot;ID_GET_FAI&quot;);
+}
+
+return retVal;</code>
+   </operation>
+   <operation name="NotifyUnsolicitedMsgBegin" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief signals the state machine that an unsolicited message is being *received via uart
+*@param caller object for qp tracing
+*/</documentation>
+    <parameter name="caller" type="void*"/>
+    <code>#if !Q_UTEST // in unit test mode ignore
+    // send ESP32C_UNSOLICITED_STA_SIG
+    QEvt *evt = Q_NEW(QEvt, ESP32C_UNSOLICITED_STA_SIG);
+    this-&gt;POST(evt,caller);
+#endif</code>
+   </operation>
+   <operation name="NotifyUnsolicitedMsgEnd" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief notify the state machine a complete unsolicited message has been received
+*@param caller object for qp tracing
+*/</documentation>
+    <parameter name="caller" type="void*"/>
+    <parameter name="event" type="DRV::ESP32C3::Event"/>
+    <parameter name="data" type="uint8_t*"/>
+    <code>// copy data to buffer
+uint32_t len =strnlen((char*)data, sizeof(rx_buffer));
+if(len&gt; sizeof(rx_buffer))
+{
+    len = sizeof(rx_buffer);
+}
+memcpy(rx_buffer, data, len);
+rx_buffer[len] = 0;
+#if !Q_UTEST // in unit test mode ignore
+    // send ESP32C_UNSOLICITED_STA_SIG
+    QEvt *evt = Q_NEW(QEvt, ESP32C_UNSOLICITED_END_SIG);
+    this-&gt;POST(evt,caller);
+#endif</code>
+   </operation>
+   <operation name="WebSocket_Open" type="bool" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief configures a websockets and opens it using a sequence of at commands, it posts the ESP32C_WEBSOCKET_OPEN_SIG
+*@param ping interval in seconds
+*@param ping timeout in seconds
+*@param pointer to websocket header, nullpointer i if no header required
+*@param websocket header length in bytes, input 0 if no header is required
+*@param uri address 
+*@param length of uri
+*@param sub protocol  used by the websocket
+*@param length of the sub protocol string
+*@param auth string
+*@param auth string length
+*@param caller object
+*@return  true process initiates correctly, false wrong parameters event not posted
+*/</documentation>
+    <parameter name="_ws_ping_interval_s" type="uint32_t"/>
+    <parameter name="_ws_ping_timeout_s" type="uint32_t"/>
+    <parameter name="_ws_header" type="uint8_t*"/>
+    <parameter name="_ws_header_len" type="uint16_t"/>
+    <parameter name="_ws_uri" type="uint8_t*"/>
+    <parameter name="_ws_uri_len" type="uint16_t"/>
+    <parameter name="_ws_sub_protocol" type="const uint8_t*"/>
+    <parameter name="_ws_sub_protocol_len" type="uint16_t"/>
+    <parameter name="_ws_auth" type="const uint8_t*"/>
+    <parameter name="_ws_auth_len" type="uint16_t"/>
+    <parameter name="caller" type="void*"/>
+    <code>bool retVal = true;
+TRACE_AO_ESP32C(&quot;WsOpnReq&quot;);
+if(_ws_header_len &lt;= sizeof(ws_header) 
+   &amp;&amp; _ws_uri_len &lt;= sizeof(ws_uri)
+   &amp;&amp; _ws_uri != nullptr 
+   &amp;&amp; _ws_uri_len&gt;0)
+{
+///
+    OpenWsSocketEvt *evt = Q_NEW(OpenWsSocketEvt, ESP32C_WEBSOCKET_OPEN_SIG);
+    evt-&gt;ws_uri_len = _ws_uri_len;
+    memcpy(evt-&gt;ws_uri, _ws_uri, _ws_uri_len);
+    evt-&gt;ws_ping_timeout_s = _ws_ping_timeout_s;
+    evt-&gt;ws_ping_interval_s = _ws_ping_interval_s;
+    evt-&gt;ws_header_len = _ws_header_len;
+    memcpy(evt-&gt;ws_header, _ws_header, _ws_header_len);
+    evt-&gt;ws_auth_len = _ws_auth_len;
+    memcpy(evt-&gt;ws_auth, _ws_auth, _ws_auth_len);
+    evt-&gt;ws_sub_protocol_len = _ws_sub_protocol_len;
+    memcpy(evt-&gt;ws_sub_protocol, _ws_sub_protocol, _ws_sub_protocol_len);
+///
+    /* Send the ESP32C_WEBSOCKET_OPEN signal*/
+    #if !Q_UTEST // in unit test mode just buffer the input parameters
+        // send ESP32C_WEBSOCKET_OPEN
+        this-&gt;POST(evt,caller);
+    #endif
+///
+
+}else
+{
+   TRACE_AO_ESP32C(&quot;WSHDRLenErr%d&quot;, _ws_header_len);
+   retVal = false;
+   AO_ESP32C_WebSocketOpenCallback(this, false, DRV::ESP32C3::LinkIdInvalid);
+}
+return retVal;</code>
+   </operation>
+   <operation name="WebSocket_SendData" type="bool" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief Trigger transmisison of data via socket *(previously opened)
+*@param data pointer
+*@param length in bytes
+*@param socket id to be used
+*@param websocket opcode
+*@param caller object for qp tracing
+*/</documentation>
+    <parameter name="data" type="const uint8_t*"/>
+    <parameter name="length" type="uint32_t"/>
+    <parameter name="_socket_id" type="DRV::ESP32C3::LinkId"/>
+    <parameter name="_ws_opcode" type="DRV::ESP32C3::WebSockedtOpCode_t"/>
+    <parameter name="caller" type="void*"/>
+    <code>bool retVal = true;
+if( length &lt;= sizeof(send_data_buffer) 
+    &amp;&amp; socket_status[_socket_id] == ESP32C_SOCKET_STATUS_WS_OPEN )
+{
+
+#if !Q_UTEST // in unit test mode just buffer the input parameters
+
+    SendDataEvt *evt = Q_NEW(SendDataEvt, ESP32C_WEBSOCKET_SEND_DATA_SIG);
+    memcpy(evt-&gt;data, data, length);
+    evt-&gt;length = length;
+    evt-&gt;socket_id = _socket_id;
+    evt-&gt;opcode = _ws_opcode;
+    this-&gt;POST(evt,caller);
+   
+#endif
+}else //&lt;-- socket not opened OR size exceeded
+{
+    TRACE_AO_ESP32C(&quot;WS_SNDERR_%d_Sock%d&quot;, length, (uint8_t)socket_status[_socket_id]);
+    retVal = false;
+#if !Q_UTEST
+    AO_ESP32C_WebSocketSendCallback(this, false, _socket_id);
+#endif
+}
+return retVal;</code>
+   </operation>
+   <operation name="WebSocket_SendData" type="bool" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief Trigger transmisison of data via socket *(previously opened)
+*@param data pointer
+*@param length in bytes
+*@param socket id to be used
+*@param websocket opcode
+*@param caller object for qp tracing
+*@param delay ticks for retry
+*/</documentation>
+    <parameter name="data" type="const uint8_t*"/>
+    <parameter name="length" type="uint32_t"/>
+    <parameter name="_socket_id" type="DRV::ESP32C3::LinkId"/>
+    <parameter name="_ws_opcode" type="DRV::ESP32C3::WebSockedtOpCode_t"/>
+    <parameter name="caller" type="void*"/>
+    <parameter name="delayTicks" type="uint8_t"/>
+    <code>#ifdef QXK_HPP_ //this api only works with QXK
+
+for (int i = 0; i&lt;5;i++)
+{
+    if(false == idle_flag)
+    {
+        QP::QXThread::delay(delayTicks);
+    }else{
+        return WebSocket_SendData(data, length,_socket_id, _ws_opcode, caller);
+    }
+
+}
+
+#endif
+return false;</code>
+   </operation>
+   <operation name="WebSocket_Close" type="bool" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief closes a previously opened websocket
+*@param link id of the socket to be closed
+*@return success or failure
+*/</documentation>
+    <parameter name="socket_id" type="DRV::ESP32C3::LinkId"/>
+    <parameter name="caller" type="void*"/>
+    <code>
+/* Create and send the ESP32C_WEBSOCKET_CLOSE*/
+#if !Q_UTEST // in unit test mode just buffer the input parameters
+    CloseSocketEvt *evt = Q_NEW(CloseSocketEvt, ESP32C_WEBSOCKET_CLOSE_SIG);
+    evt-&gt;socket_id = socket_id;
+    this-&gt;POST(evt,caller);
+#endif
+return true;</code>
+   </operation>
+   <operation name="NotifyUnsolicitedMsgCont" type="void" visibility="0x00" properties="0x00">
+    <documentation>/**
+*@brief callback to signal that  the stream of an unsolicited message is continuing
+*@param calle robject
+*/</documentation>
+    <parameter name="caller" type="void*"/>
+    <code>m_unsolicitedTimeEvt.rearm(ESP32C_UNSOLICITED_TIMEOUT_MS);</code>
+   </operation>
+   <operation name="UdpOpen" type="bool" visibility="0x00" properties="0x00">
+    <documentation>/** @brief  open ad udp listening socket*/</documentation>
+    <parameter name="_local_port" type="uint8_t"/>
+    <parameter name="_remote_port" type="uint8_t"/>
+    <parameter name="address" type="const uint8_t*"/>
+    <parameter name="caller" type="void*"/>
+    <code>udp_local_port = _local_port;
+udp_remote_port = _remote_port;
+
+/* buffer address and port internally*/
+strncpy((char*)remote_address,(const char*)address, sizeof(remote_address));
+
+/* Send the ESP32C_TCP_CONNECT_SIG*/
+#if !Q_UTEST // in unit test mode just buffer the input parameters
+    // send ESP32C_HOTSPOT_CONF_SIG
+    QEvt *evt = Q_NEW(QEvt, ESP32C_UDP_CONNECT_SIG);
+    this-&gt;POST(evt,caller);
+#endif</code>
+   </operation>
+   <statechart properties="0x02">
+    <initial target="../1/5">
+     <action>// arm the private time event to expire in 1/2s
+
+(void)e; // unused parameter</action>
+     <initial_glyph conn="126,3,4,0,10">
+      <action box="0,-2,6,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="InitState">
+     <tran trig="ESP32C_START" target="../7">
+      <action brief="Begin ESP32C operation and set wifi mode">const AO_ESP32C_StartEvent* _evt = Q_EVT_CAST(AO_ESP32C_StartEvent);
+this-&gt;mode = _evt-&gt;mode;
+TRACE_AO_ESP32C(&quot;START%d&quot;, (uint8_t)this-&gt;mode);</action>
+      <tran_glyph conn="90,5,0,0,8,-53,2">
+       <action box="-41,-2,45,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="TIMEOUT">
+      <action>timeout_counter++;
+#if !Q_UTEST
+   TRACE_AO_ESP32C(&quot;Generic T/O&quot;);
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif</action>
+      <choice>
+       <guard brief="timeout_counter_exceeded">timeout_counter&gt; ESP32C_TIMEOUT_COUNT_MAX</guard>
+       <action>TRACE_AO_ESP32C(&quot;MODULE UNRESPONSIVE T/O&quot;);
+AO_ESP32C_TimeoutModuleUnresponsiveCallback(this);</action>
+       <choice_glyph conn="296,19,5,-1,-17">
+        <action box="-16,-2,34,2"/>
+       </choice_glyph>
+      </choice>
+      <tran_glyph conn="306,16,1,-1,-10,3">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="ESP32C_UNSOLICITED_END">
+      <action brief="identify unsolicited message, disarm timer">m_unsolicitedTimeEvt.disarm();
+uint32_t token_length = 0;
+init.esp-&gt;GetRxBufferData(rx_buffer, sizeof(rx_buffer));
+ESP32C3::UnsolicitedMessage type = init.esp-&gt;GetUnsolicitedMessage(rx_buffer, &amp;token_length);
+unsolicited_msg_flag = false;
+if(type == ESP32C3::IPD)
+{
+    uint32_t len = 0;
+    
+    ESP32C3::LinkId socket;
+    uint8_t* ipdStart = nullptr;
+    uint8_t* data = init.esp-&gt;GetIPD(rx_buffer,&amp;ipdStart, &amp;len,sizeof(rx_buffer), &amp;socket);
+    TRACE_AO_ESP32C(&quot;DataRcvd,%d,%d&quot;, (uint8_t)socket, len);
+    if(data!= nullptr)
+    {
+       AO_ESP32C_SocketDataReceiveCallback(this, true , socket, data, len);
+    }
+}else{
+    TRACE_AO_ESP32C(&quot;RecvdUnsol%d&quot;, (uint8_t)type);
+}
+init.esp-&gt;FlushRx();</action>
+      <tran_glyph conn="169,5,0,-1,11,-5">
+       <action box="-29,9,29,4"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="ESP32C_UNSOLICITED_STA">
+      <action brief="arm or re-arm timeout timer for unsolicited messages">m_unsolicitedTimeEvt.disarm();
+unsolicited_msg_flag = true;
+m_unsolicitedTimeEvt.armX( ESP32C_UNSOLICITED_TIMEOUT_MS,
+                0);</action>
+      <tran_glyph conn="177,5,0,-1,16,-8">
+       <action box="-29,14,21,4"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="ESP32C_UNSOLICITED_TIMEOUT">
+      <action brief="flush esp uart receive">m_unsolicitedTimeEvt.disarm();
+unsolicited_msg_flag = false;
+uint8_t parse_limit = 10;
+uint32_t token_length = 0;
+uint32_t offset = 0;
+init.esp-&gt;GetRxBufferData(rx_buffer, sizeof(rx_buffer));
+ESP32C3::UnsolicitedMessage type = init.esp-&gt;GetUnsolicitedMessage(rx_buffer, &amp;token_length);
+while(ESP32C3::UnsolicitedMessage::Unknown != type &amp;&amp; parse_limit!=0)
+{
+    if(type == ESP32C3::IPD)
+    {
+        uint32_t len = 0;
+        
+        ESP32C3::LinkId socket;
+        
+        uint8_t* ipdStart = nullptr;
+        uint8_t* data = init.esp-&gt;GetIPD(rx_buffer,&amp;ipdStart, &amp;len, sizeof(rx_buffer), &amp;socket);
+        token_length+= ipdStart-rx_buffer;
+        TRACE_AO_ESP32C(&quot;DataRcvd,%d,%d&quot;, (uint8_t)socket, len);
+        if(data!= nullptr)
+        {
+           AO_ESP32C_SocketDataReceiveCallback(this, true , socket, data, len);
+        }
+    }
+    else if(type == ESP32C3::WebSocketData)
+    {
+        uint32_t len = 0;
+        
+        ESP32C3::LinkId socket;
+        
+        uint8_t* wsDataStart = nullptr;
+        uint8_t* data = init.esp-&gt;GetWsData(rx_buffer,&amp;wsDataStart, &amp;len, sizeof(rx_buffer), &amp;socket);
+        token_length+= wsDataStart-rx_buffer;
+        TRACE_AO_ESP32C(&quot;WSDataRcvd,%d,%d&quot;, (uint8_t)socket, len);
+        if(data!= nullptr)
+        {
+           AO_ESP32C_WebSocketDataReceiveCallback(this, true , socket, data, len);
+        }
+    }
+    else if(type == DRV::ESP32C3::SocketConnection )
+    {
+       
+       ESP32C3::LinkId id;
+       bool parseResult = init.esp-&gt;GetClientConnectionId(rx_buffer, &amp;id);
+       TRACE_AO_ESP32C(&quot;conn%d&quot;, (uint8_t)id);
+       if(parseResult){
+          
+          socket_status[id] = ESP32C_SOCKET_STATUS_SERVER_OPEN;
+          AO_ESP32C_ServerTcpSocketOpen(this, true, id);
+       }
+    }
+    else if(type == DRV::ESP32C3::SocketClose )
+    {
+       
+       ESP32C3::LinkId id;
+       bool parseResult = init.esp-&gt;GetClientConnectionId(rx_buffer, &amp;id);
+       TRACE_AO_ESP32C(&quot;CliDisconn%d&quot;, (uint8_t)id);
+       if(parseResult){
+          socket_status[id] = ESP32C_SOCKET_STATUS_CLOSE;
+       }
+    }
+    else if(type == DRV::ESP32C3::WifiClientConnection )
+    {
+       
+       AO_ESP32C_HotspotClientConnectionCallback(this, true);
+    }
+    else if(type == DRV::ESP32C3::WifiClientDisconnection )
+    {
+       
+       /*scan for sockets that used that connection todo this needs to be reworked if we use local lan connectivity*/
+       for(int i = 0; i&lt; DRV::ESP32C3::LinkIdMax; i++)
+       {
+           /* manually close the socket since esp32 does not do that automatically*/
+           if(socket_status[i] == ESP32C_SOCKET_STATUS_SERVER_OPEN )
+           {
+               TcpCloseSocket((DRV::ESP32C3::LinkId)i, this);
+           }
+       }
+       AO_ESP32C_HotspotClientDisconnectionCallback(this, true);
+       
+    }
+    else if(type == DRV::ESP32C3::WifiDisconnection )
+    {
+       
+       TRACE_AO_ESP32C(&quot;WifiAPDisconn&quot;);
+
+       AO_ESP32C_WifiDisconnectionCallback(this, true);
+    }
+    else if(type == DRV::ESP32C3::WifiConnection )
+    {
+       
+       TRACE_AO_ESP32C(&quot;WifiConn&quot;);
+       AO_ESP32C_WifiConnectCallback(this, true);
+    }
+    else if(type == DRV::ESP32C3::IpAssignment )
+    {
+       
+       TRACE_AO_ESP32C(&quot;IpAss&quot;);
+       AO_ESP32C_IpAssignedCallback(this, true);
+    }
+    else if(type == DRV::ESP32C3::WifiIpClient )
+    {
+       
+       TRACE_AO_ESP32C(&quot;HotspotIpAss&quot;);
+       AO_ESP32C_HotspotIpAssignedCallback(this, true);
+    }
+    else if(type == DRV::ESP32C3::WebsocketConnect)
+    {
+       ESP32C3::LinkId id;
+       
+       bool parseResult = init.esp-&gt;GetWsClientConnectionId(rx_buffer, &amp;id);
+       TRACE_AO_ESP32C(&quot;WsCliConn%d&quot;, (uint8_t)id);
+    }
+    else if(type == DRV::ESP32C3::WebsocketDisconnect)
+    {
+       ESP32C3::LinkId id;
+       
+       bool parseResult = init.esp-&gt;GetWsClientDisconnectionId(rx_buffer, &amp;id);
+       TRACE_AO_ESP32C(&quot;WsCliDisconn%d&quot;, (uint8_t)id);
+       if(parseResult)
+       {
+          socket_status[id] = ESP32C_SOCKET_STATUS_CLOSE;
+          AO_ESP32C_WebSocketCloseCallback(this, true,  id);
+       }
+    }
+    else if(type == DRV::ESP32C3::WebsocketClosed)
+    {
+       ESP32C3::LinkId id;
+       
+       bool parseResult = init.esp-&gt;GetWsClientClosedId(rx_buffer, &amp;id);
+       TRACE_AO_ESP32C(&quot;WsCliClosed%d&quot;, (uint8_t)id);
+       if(parseResult)
+       {
+          socket_status[id] = ESP32C_SOCKET_STATUS_CLOSE;
+          AO_ESP32C_WebSocketCloseCallback(this, true,  id);
+
+       }
+    }
+    else{
+        break;
+        TRACE_AO_ESP32C(&quot;RecvdUnsol%d&quot;, (uint8_t)type);
+    }
+    // decresease parse limit counter to forbid infinite loops
+    parse_limit--;
+    // increase parsing offset
+    offset += token_length;
+    // advance and parse again
+    type = init.esp-&gt;GetUnsolicitedMessage(rx_buffer+offset, &amp;token_length);
+}//while loop 
+memset(rx_buffer, 0, sizeof(rx_buffer));
+// Flush received data
+init.esp-&gt;FlushRx();
+
+TRACE_AO_ESP32C(&quot;UnsolicitedEnd&quot;);</action>
+      <tran_glyph conn="191,5,0,-1,16">
+       <action box="0,14,27,4"/>
+      </tran_glyph>
+     </tran>
+     <state name="offState">
+      <state_glyph node="117,13,11,6"/>
+     </state>
+     <state name="Idle_ConfiguredState">
+      <entry brief="become able to receive unsolicited messages">
+TRACE_AO_ESP32C(&quot;IDLECONFENTR&quot;);</entry>
+      <tran trig="ESP32C_HOTSPOT_CONFIG" target="../5">
+       <tran_glyph conn="62,113,3,3,7">
+        <action box="0,-2,19,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="ESP32C_CONNECT_WIFI" target="../6">
+       <tran_glyph conn="62,46,3,0,34,3">
+        <action box="0,-2,27,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="ESP32C_WEBSOCKET_SEND_DATA">
+       <action brief="defer ws send request">if(init.deferQueue-&gt;getNFree()&gt;0)
+{
+    this-&gt;defer(init.deferQueue, e);
+    TRACE_AO_ESP32C(&quot;WsSendDeferred&quot;);
+}
+else
+{
+    TRACE_AO_ESP32C(&quot;LostWsSend&quot;);
+}
+</action>
+       <tran_glyph conn="139,24,0,-1,27">
+        <action box="1,26,51,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="ESP32C_SEND_DATA">
+       <action brief="defer data send request">if(init.deferQueue-&gt;getNFree()&gt;0)
+{
+    this-&gt;defer(init.deferQueue, e);
+    TRACE_AO_ESP32C(&quot;SendDeferred&quot;);
+}
+else
+{
+    TRACE_AO_ESP32C(&quot;LostSend&quot;);
+}</action>
+       <tran_glyph conn="148,24,0,-1,32">
+        <action box="1,31,40,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="ESP32C_CONNECTION_CHECK">
+       <action brief="defer conn check request">if(init.deferQueue-&gt;getNFree()&gt;0)
+{
+    this-&gt;defer(init.deferQueue, e);
+    TRACE_AO_ESP32C(&quot;ConnChkDef&quot;);
+}
+else
+{
+    TRACE_AO_ESP32C(&quot;LostConnChk&quot;);
+}</action>
+       <tran_glyph conn="133,24,0,-1,21">
+        <action box="0,19,45,2"/>
+       </tran_glyph>
+      </tran>
+      <state name="HotspotConfigurationState">
+       <documentation>Configure hotspot</documentation>
+       <entry>error_counter = 0;</entry>
+       <exit>error_counter = 0;</exit>
+       <initial target="../3">
+        <initial_glyph conn="85,115,5,0,15,3">
+         <action box="0,-2,10,2"/>
+        </initial_glyph>
+       </initial>
+       <tran trig="ESP32C_ERR">
+        <action>error_counter++;
+m_timeEvt.disarm();</action>
+        <choice target="../../..">
+         <guard>else</guard>
+         <action brief="hotsport config fail, retries exceeded">AO_ESP32C_WifiConnectCallback(this, false);</action>
+         <choice_glyph conn="80,131,4,3,24,-18">
+          <action box="0,1,23,4"/>
+         </choice_glyph>
+        </choice>
+        <choice target="../../3">
+         <guard>error_counter&lt;ESP32C_RETRY_MAX</guard>
+         <choice_glyph conn="80,131,5,2,7,-6">
+          <action box="-9,-4,30,3"/>
+         </choice_glyph>
+        </choice>
+        <tran_glyph conn="69,131,3,-1,11">
+         <action box="0,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state name="Parse_CWSAP_Response">
+        <entry brief="Check esp32c module response to the at cwsap command">#if !Q_UTEST
+    if(init.esp-&gt;Parse_AT_CWSAP())
+    {
+       QEvt *evt = Q_NEW(QEvt, ESP32C_OK_SIG);
+       this-&gt;POST(evt,this); 
+    }else{
+       QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+       this-&gt;POST(evt,this); 
+    }
+#endif</entry>
+        <tran trig="ESP32C_OK" target="../../../7">
+         <action>hotspot_active = true;
+AO_ESP32C_HotspotOpenCallback(this, true);
+timeout_counter = 0;</action>
+         <tran_glyph conn="104,145,2,3,3,32">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="83,137,35,8">
+         <entry box="1,2,34,4"/>
+        </state_glyph>
+       </state>
+       <state name="SEND_AT_CWSAP">
+        <entry brief="Send CWSAP command to configure the hotspot AT+CWSAP using the stored parameters">init.esp-&gt;Send_AT_CWSAP(
+    hotspot_ssid,
+    hotspot_pwd,
+    hotspot_channel_id,
+    hotspot_encryption,
+    hotspot_max_conn,
+    hotspot_hidden);
+
+m_timeEvt.armX( ESP32C_WIFI_CONN_INTERVAL_MS,
+                0);</entry>
+        <tran trig="ESP32C_OK" target="../../2">
+         <action>m_timeEvt.disarm();</action>
+         <tran_glyph conn="104,125,2,0,12">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="82,118,36,7">
+         <entry box="1,2,27,2"/>
+        </state_glyph>
+       </state>
+       <state_glyph node="69,106,52,45">
+        <entry box="1,2,15,5"/>
+        <exit box="1,7,18,5"/>
+       </state_glyph>
+      </state>
+      <state name="WiFi_ConfigState">
+       <documentation>Connect to a Wifi  with AT+CWJAP</documentation>
+       <entry>error_counter = 0;</entry>
+       <exit>error_counter = 0;
+m_timeEvt.disarm();</exit>
+       <initial target="../2">
+        <initial_glyph conn="88,67,4,0,4">
+         <action box="0,-2,10,2"/>
+        </initial_glyph>
+       </initial>
+       <tran trig="ESP32C_ERR">
+        <action>error_counter++;
+TRACE_AO_ESP32C(&quot;WifiConnErr_%d&quot;, error_counter);
+m_timeEvt.disarm();</action>
+        <choice target="../../2">
+         <guard>error_counter&lt;ESP32C_RETRY_MAX</guard>
+         <action>TRACE_AO_ESP32C(&quot;Retry&quot;);</action>
+         <choice_glyph conn="101,64,4,0,7">
+          <action box="1,-2,27,2"/>
+         </choice_glyph>
+        </choice>
+        <choice target="../../../7">
+         <guard>else</guard>
+         <action>TRACE_AO_ESP32C(&quot;ConnRetriesExceed&quot;);
+
+AO_ESP32C_WifiConnectCallback(this, false);</action>
+         <choice_glyph conn="101,64,5,3,22,24,13">
+          <action box="0,-6,10,2"/>
+         </choice_glyph>
+        </choice>
+        <tran_glyph conn="69,61,3,-1,32,3">
+         <action box="0,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state name="Send_AT_CWJAP">
+        <entry brief="Send the CWJAP command to connect to a wifi access point">init.esp-&gt;Send_AT_CWJAP(ssid,pwd);
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WIFI_CONN_INTERVAL_MS,
+                0);</entry>
+        <tran trig="ESP32C_OK" target="../../3">
+         <action brief="disarm one shot timeout timer">m_timeEvt.disarm();
+timeout_counter = 0;</action>
+         <tran_glyph conn="88,79,2,0,4">
+          <action box="0,-2,36,4"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="71,71,34,8">
+         <entry box="1,2,32,4"/>
+        </state_glyph>
+       </state>
+       <state name="Parse_CWJAP_Response">
+        <entry brief="parse the content of the command response, when connected self post an ESP32C_OK_SIG, if not ESP32C_ERR_SIG">#if !Q_UTEST
+    if(init.esp-&gt;Parse_AT_CWJAP())
+    {
+       QEvt *evt = Q_NEW(QEvt, ESP32C_OK_SIG);
+       this-&gt;POST(evt,this); 
+    }else{
+       QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+       this-&gt;POST(evt,this); 
+    }
+#endif</entry>
+        <tran trig="ESP32C_OK" target="../../../7">
+         <action>timeout_counter = 0;
+m_connectionCheckTimeEvt.disarm();
+m_connectionCheckTimeEvt.armX( ESP32C_AO_CONNECTION_CHECK_PERIOD_MS,
+                0);
+AO_ESP32C_WifiConnectCallback(this, true);
+</action>
+         <tran_glyph conn="105,93,1,3,31">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="71,83,34,12">
+         <entry box="1,2,33,6"/>
+        </state_glyph>
+       </state>
+       <state_glyph node="69,49,51,49">
+        <entry box="1,2,16,4"/>
+        <exit box="1,6,16,4"/>
+       </state_glyph>
+      </state>
+      <state name="Idle_NetworkConnectedState">
+       <entry brief="reset error counter, recall deferred requests, flush driver rx buffer">init.esp-&gt;FlushRx();
+error_counter = 0;
+bool recalled = this-&gt;recall(init.deferQueue);
+idle_flag = true;
+if(recalled)
+{
+   // recal deferred events
+   TRACE_AO_ESP32C(&quot;RecallingEvt&quot;);
+}
+
+</entry>
+       <exit>idle_flag = false;</exit>
+       <tran trig="ESP32C_TCP_CONNECT" target="../../8/2">
+        <action>error_counter = 0;
+client_link_id = DRV::ESP32C3::LinkId0;
+TRACE_AO_ESP32C(&quot;StaTcpReq@%s&quot;, (const char*)Q_EVT_CAST(OpenTcpSocketEvt)-&gt;address);
+/* buffer address and port internally*/
+strncpy((char*)remote_address,
+        (const char*)Q_EVT_CAST(OpenTcpSocketEvt)-&gt;address,
+        sizeof(remote_address));
+remote_port = Q_EVT_CAST(OpenTcpSocketEvt)-&gt;port;</action>
+        <tran_glyph conn="172,104,1,3,33">
+         <action box="-18,-2,21,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_OPEN_SERVER" target="../../8/10">
+        <tran_glyph conn="172,330,1,3,35">
+         <action box="-18,-2,25,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_WEBSOCKET_OPEN" target="../../8/6/1">
+        <action brief="copy event data, check auth, uri, subprotocol sizes, reset error counter">error_counter = 0;
+client_link_id = DRV::ESP32C3::LinkId0;
+
+/* buffer header internally*/
+ws_header_len =      Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_header_len;
+ws_sub_protocol_len = Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_sub_protocol_len;
+ws_auth_len =     Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_auth_len;
+ws_uri_len =         Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_uri_len;
+ws_ping_interval_s = Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_ping_interval_s;
+ws_ping_timeout_s =  Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_ping_timeout_s;
+// heaqder may or may not be required
+if(ws_header_len&gt;0)
+{
+    memset(ws_header, 0x0, sizeof(ws_header));
+    memcpy((char*)ws_header,
+           (const char*)Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_header,
+           ws_header_len);
+}
+else
+{
+    ws_header_len = 0;
+}
+if( ws_sub_protocol_len &gt;0 &amp;&amp;  ws_sub_protocol_len&lt; sizeof(ws_sub_protocol))
+{
+    memset(ws_sub_protocol, 0x0, sizeof(ws_sub_protocol));
+    memcpy(ws_sub_protocol,
+           Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_sub_protocol,
+           ws_sub_protocol_len);
+}
+else
+{
+    TRACE_AO_ESP32C(&quot;NoSubProt&quot;);
+    ws_sub_protocol_len = 0;
+}
+
+if( ws_auth_len &gt;0 &amp;&amp;  ws_auth_len&lt; sizeof(ws_auth))
+{
+    memset(ws_auth, 0x0, sizeof(ws_auth));
+    memcpy(ws_auth, Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_auth, ws_auth_len);
+}
+else
+{
+    TRACE_AO_ESP32C(&quot;NoAuth&quot;);
+    ws_auth_len = 0;
+}
+
+memset(ws_uri, 0x0, sizeof(ws_uri));
+memcpy((char*)ws_uri,
+            (const char*)Q_EVT_CAST(OpenWsSocketEvt)-&gt;ws_uri,
+             ws_uri_len);</action>
+        <tran_glyph conn="172,252,1,3,38">
+         <action box="0,-2,30,7"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_SEND_DATA" target="../../8/4">
+        <action brief="trigger data transmission via AT+CIPSEND, reset error counter">
+// clean the tx buffer
+memset(send_data_buffer, 0, sizeof(send_data_buffer));
+// get send data info from the event
+memcpy(send_data_buffer, Q_EVT_CAST(SendDataEvt)-&gt;data, Q_EVT_CAST(SendDataEvt)-&gt;length);
+send_data_length = Q_EVT_CAST(SendDataEvt)-&gt;length;
+client_link_id = Q_EVT_CAST(SendDataEvt)-&gt;socket_id;
+// reset error counter
+error_counter = 0;
+// reset api result buffer
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_TCP_INTERVAL_MS,
+                0);
+// prepare for transmission
+init.esp-&gt;Send_AT_CIPSEND(client_link_id, send_data_length);
+
+</action>
+        <tran_glyph conn="172,162,1,3,37">
+         <action box="-11,-2,34,6"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_READ_DATA" target="../../8/5">
+        <action brief="receive data"/>
+        <tran_glyph conn="172,141,1,3,33">
+         <action box="-9,-2,16,5"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_WEBSOCKET_SEND_DATA" target="../../8/7">
+        <action brief="get data from event, reset error counter, send at command, start timer">// clean the tx buffer
+memset(send_data_buffer, 0, sizeof(send_data_buffer));
+// get send data info from the event
+memcpy(send_data_buffer, Q_EVT_CAST(SendDataEvt)-&gt;data, Q_EVT_CAST(SendDataEvt)-&gt;length);
+send_data_length = Q_EVT_CAST(SendDataEvt)-&gt;length;
+
+ws_opcode = Q_EVT_CAST(SendDataEvt)-&gt;opcode;;
+client_link_id = Q_EVT_CAST(SendDataEvt)-&gt;socket_id;
+// reset error counter
+error_counter = 0;
+// reset command parse result
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WS_INTERVAL_MS,
+                0);
+// prepare for transmission
+init.esp-&gt;Send_AT_WSSEND(client_link_id, send_data_length, ws_opcode);</action>
+        <tran_glyph conn="172,224,1,3,36">
+         <action box="0,-2,31,6"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_WEBSOCKET_CLOSE" target="../../8/8">
+        <action brief="send AT+WSCLOSE command">DRV::ESP32C3::LinkId socket = 
+    Q_EVT_CAST(CloseSocketEvt)-&gt;socket_id;
+client_close_id = socket;
+
+// reset api result buffer
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WS_INTERVAL_MS,
+                0);
+// close socket command
+init.esp-&gt;Send_AT_WSCLOSE(client_close_id);
+</action>
+        <tran_glyph conn="172,296,1,3,35">
+         <action box="0,-2,23,4"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_CLOSE_SOCKET" target="../../8/1">
+        <action brief="send AT+CIPCLOSE to close a socket">DRV::ESP32C3::LinkId socket = 
+    Q_EVT_CAST(CloseSocketEvt)-&gt;socket_id;
+client_close_id = socket;
+
+// reset api result buffer
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WIFI_CONN_INTERVAL_MS,
+                0);
+// close socket command
+init.esp-&gt;Send_AT_CIPCLOSE(client_close_id);</action>
+        <tran_glyph conn="172,364,1,3,35">
+         <action box="0,-2,18,7"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_UDP_CONNECT" target="../../8/11">
+        <tran_glyph conn="172,320,1,3,35">
+         <action box="0,-2,19,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_CONNECTION_CHECK" target="../../8/12">
+        <action brief="check connection status">// reset api result buffer
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WS_INTERVAL_MS,
+                0);
+// close socket command
+init.esp-&gt;Send_AT_CWSTATE();</action>
+        <tran_glyph conn="172,92,5,3,33">
+         <action box="0,-2,24,5"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="136,84,36,312">
+        <entry box="1,2,32,2"/>
+        <exit box="1,4,6,2"/>
+       </state_glyph>
+      </state>
+      <state name="Busy_NetworkConnectedState">
+       <tran trig="ESP32C_CONNECT_WIFI">
+        <action brief="defer connection request">if(init.deferQueue-&gt;getNFree()&gt;0)
+{
+    this-&gt;defer(init.deferQueue, e);
+    TRACE_AO_ESP32C(&quot;ApConnectDeferred&quot;);
+}
+else
+{
+    TRACE_AO_ESP32C(&quot;LostApConnect&quot;);
+}</action>
+        <tran_glyph conn="233,60,0,-1,9,37">
+         <action box="0,6,38,3"/>
+        </tran_glyph>
+       </tran>
+       <state name="CloseTCPSocketState">
+        <exit brief="disarm timer signal socket as closed">m_timeEvt.disarm();
+socket_status[client_close_id] = ESP32C_SOCKET_STATUS_CLOSE;</exit>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <action brief="trigger callback">AO_ESP32C_TcpSocketCloseCallback(this, false,  client_close_id);</action>
+         <tran_glyph conn="207,379,3,1,-35">
+          <action box="0,-2,25,4"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK" target="../../../7">
+         <action brief="trigger callback">AO_ESP32C_TcpSocketCloseCallback(this, true,  client_close_id);
+timeout_counter = 0;</action>
+         <tran_glyph conn="207,383,3,1,-35">
+          <action box="0,-2,12,4"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="207,362,43,23">
+         <exit box="1,2,31,4"/>
+        </state_glyph>
+       </state>
+       <state name="OpenTCPSocketState">
+        <entry brief="Initiate the AT+CIPSTART command">commandParseResult = false;
+/* see if there is a free link id (socket id)*/
+if(GetFreeSocketId(&amp;client_link_id))
+{
+    /* issue the at+cip start command */
+    init.esp-&gt;Send_AT_CIPSTART(client_link_id,
+                         DRV::ESP32C3::TCP,
+                         (uint8_t*)remote_address,
+                         remote_port);
+    m_timeEvt.disarm();
+    m_timeEvt.armX( ESP32C_TCP_INTERVAL_MS,
+                    0);
+}else{
+   /* dispatch err sig*/
+#if !Q_UTEST
+   
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif
+}</entry>
+        <exit brief="disarm timer">m_timeEvt.disarm();</exit>
+        <tran trig="ESP32C_ERR">
+         <action brief="increase client link id and check for retry">
+TRACE_AO_ESP32C(&quot;TcpE,Link%d&quot;, (uint8_t)client_link_id);
+// next retry, use a different link id
+client_link_id = 
+                    static_cast&lt;DRV::ESP32C3::LinkId&gt;((
+                    (uint8_t)client_link_id+1)%
+                    (uint8_t)DRV::ESP32C3::LinkIdMax);
+// increase error counter
+error_counter++;</action>
+         <choice target="../../../../7">
+          <guard>else</guard>
+          <action brief="reset client link id, trigger callback">AO_ESP32C_TcpSocketOpenCallback(this, false, client_link_id);
+client_link_id = DRV::ESP32C3::LinkId0;</action>
+          <choice_glyph conn="218,118,4,1,13,-46">
+           <action box="-28,10,30,3"/>
+          </choice_glyph>
+         </choice>
+         <choice target="../..">
+          <guard brief="retries_available">error_counter&lt;ESP32C_RETRY_MAX</guard>
+          <action brief="retry"/>
+          <choice_glyph conn="218,118,5,3,-15,3,2">
+           <action box="-12,-2,14,6"/>
+          </choice_glyph>
+         </choice>
+         <tran_glyph conn="237,127,2,-1,-9,-19">
+          <action box="-14,-11,21,4"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK">
+         <action brief="parse module response">#if !Q_UTEST
+    commandParseResult = init.esp-&gt;Parse_AT_CIPSTART();
+#else
+    commandParseResult = true;
+#endif</action>
+         <choice target="../../../../7">
+          <guard brief="command successful">true == commandParseResult</guard>
+          <action brief="trigger callback">socket_status[client_link_id] = ESP32C_SOCKET_STATUS_OPEN;
+timeout_counter = 0;
+AO_ESP32C_TcpSocketOpenCallback(this, true, client_link_id );</action>
+          <choice_glyph conn="250,109,5,1,-78">
+           <action box="-42,-2,37,2"/>
+          </choice_glyph>
+         </choice>
+         <choice>
+          <guard brief="else"/>
+          <action brief="dispatch ESP32C_ERR">//QEvt evt(ESP32C_ERR_SIG);
+//this-&gt;DISPATCH(&amp;evt,getPrio()); 
+
+#if !Q_UTEST
+
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif</action>
+          <choice_glyph conn="250,109,4,-1,5">
+           <action box="0,3,16,6"/>
+          </choice_glyph>
+         </choice>
+         <tran_glyph conn="269,109,1,-1,-19">
+          <action box="-12,-2,13,4"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="205,101,64,26">
+         <entry box="1,2,20,2"/>
+         <exit box="1,4,24,4"/>
+        </state_glyph>
+       </state>
+       <state name="TransmitDataState">
+        <entry brief="stream data to module">// reset api result buffer
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WIFI_CONN_INTERVAL_MS,
+                0);
+init.esp-&gt;SendData(send_data_buffer);</entry>
+        <exit brief="disarm timer and trigger callback">m_timeEvt.disarm();
+
+error_counter = 0;</exit>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <action>#if !Q_UTEST
+    AO_ESP32C_SendDataCallback(this, false, client_link_id);
+    TRACE_AO_ESP32C(&quot;TxErr&quot;);
+    memset(rx_buffer, 0, sizeof(rx_buffer));
+    // Flush received data
+    init.esp-&gt;FlushRx();
+#endif</action>
+         <tran_glyph conn="209,189,3,1,-37">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK">
+         <action brief="parse_response">//commandParseResult = init.esp-&gt;Parse_SendData();
+commandParseResult = true;
+#if Q_UTEST
+    commandParseResult = true;
+#endif</action>
+         <choice>
+          <guard>else</guard>
+          <action brief="dispatch_ESP32C_ERR">#if !Q_UTEST
+   TRACE_AO_ESP32C(&quot;SendError&quot;);
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif</action>
+          <choice_glyph conn="235,191,4,-1,4,22">
+           <action box="11,2,13,5"/>
+          </choice_glyph>
+         </choice>
+         <choice target="../../../../7">
+          <guard brief="response_ok">commandParseResult == true</guard>
+          <action brief="trigger_callback">timeout_counter = 0;
+error_counter = 0;
+#if !Q_UTEST
+    if(socket_status[client_link_id] == ESP32C_SOCKET_STATUS_OPEN )
+    {
+        AO_ESP32C_SendDataCallback(this, true, client_link_id);
+    }
+    else if(socket_status[client_link_id] == ESP32C_SOCKET_STATUS_WS_OPEN )
+    {
+        AO_ESP32C_WebSocketSendCallback(this, true, client_link_id);
+    }
+    TRACE_AO_ESP32C(&quot;TxCmplt&quot;);
+#endif</action>
+          <choice_glyph conn="235,191,5,1,-63">
+           <action box="-14,-2,21,4"/>
+          </choice_glyph>
+         </choice>
+         <tran_glyph conn="269,185,1,-1,-26,6,-8">
+          <action box="-8,-2,13,4"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="209,181,60,16">
+         <entry box="1,2,21,2"/>
+         <exit box="1,4,33,2"/>
+        </state_glyph>
+       </state>
+       <state name="InitiateSendDataState">
+        <exit brief="disarm timer on exit">m_timeEvt.disarm();
+error_counter = 0;</exit>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <action brief="trigger callback">#if !Q_UTEST
+
+
+AO_ESP32C_SendDataCallback(this, false, client_link_id);
+
+#endif</action>
+         <tran_glyph conn="209,170,3,1,-37">
+          <action box="-10,-2,10,6"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK">
+         <action brief="parse response">commandParseResult = init.esp-&gt;Parse_AT_CIPSEND();
+#if Q_UTEST
+    commandParseResult = true;
+#endif</action>
+         <choice>
+          <guard>else</guard>
+          <action brief="dispatch_ESP32C_ERR">
+#if !Q_UTEST
+
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif</action>
+          <choice_glyph conn="250,163,5,-1,-13">
+           <action box="-19,-1,19,4"/>
+          </choice_glyph>
+         </choice>
+         <choice target="../../../3">
+          <guard brief=" ready_to_send">true == commandParseResult</guard>
+          <action>error_counter = 0;</action>
+          <choice_glyph conn="250,163,4,0,18">
+           <action box="-17,5,20,2"/>
+          </choice_glyph>
+         </choice>
+         <tran_glyph conn="273,163,1,-1,-23">
+          <action box="-8,-2,12,7"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="209,158,64,17">
+         <exit box="1,2,30,2"/>
+        </state_glyph>
+       </state>
+       <state name="WaitingForDataState">
+        <entry brief="Be ready to receive incoming data from the module">m_timeEvt.disarm();
+m_timeEvt.armX( user_timeout_ms,
+                0);
+// wait for data
+//init.esp-&gt;WaitData();</entry>
+        <exit brief="disarm timer ">m_timeEvt.disarm();
+</exit>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <action brief="negative callback">AO_ESP32C_ReadCompleteCallback(this, false);</action>
+         <tran_glyph conn="205,144,3,1,-33">
+          <action box="0,-2,19,4"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK" target="../../../7">
+         <action brief="trigger callback and copy data">timeout_counter = 0;
+if(rx_data_length&lt;= receive_data_max_length)
+{
+    TRACE_AO_ESP32C(&quot;RCV_OK,%d&quot;,rx_data_length);
+    memcpy(receive_data_buffer_ptr,
+            rx_buffer,
+            rx_data_length);
+    AO_ESP32C_ReadCompleteCallback(this, true);
+}
+else
+{
+    TRACE_AO_ESP32C(&quot;RCV_Ko,Overflow%d&quot;,rx_data_length);
+    AO_ESP32C_ReadCompleteCallback(this, false);
+}
+
+</action>
+         <tran_glyph conn="205,147,3,1,-33">
+          <action box="0,0,16,4"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="205,132,64,20">
+         <entry box="1,2,39,2"/>
+         <exit box="1,4,30,2"/>
+        </state_glyph>
+       </state>
+       <state name="WebSocket_OpenState">
+        <exit>error_counter = 0;
+m_timeEvt.disarm();</exit>
+        <tran trig="ESP32C_ERR">
+         <action brief="check for a retry">TRACE_AO_ESP32C(&quot;WspE,Link%d&quot;, (uint8_t)client_link_id);
+// next retry, use a different link id
+client_link_id = 
+                    static_cast&lt;DRV::ESP32C3::LinkId&gt;((
+                    (uint8_t)client_link_id+1)%
+                    ESP32C3_MAX_WS_SOCKET);
+// increase error counter
+error_counter++;</action>
+         <choice target="../../1">
+          <guard brief="retries available">error_counter&lt;ESP32C_RETRY_MAX</guard>
+          <choice_glyph conn="277,252,5,1,-42">
+           <action box="-14,-2,17,2"/>
+          </choice_glyph>
+         </choice>
+         <choice target="../../../../7">
+          <guard>else</guard>
+          <action brief="socket not opened trigger callback">TRACE_AO_ESP32C(&quot;Wsp End of Retries&quot;);
+socket_status[client_link_id] = ESP32C_SOCKET_STATUS_CLOSE;
+AO_ESP32C_WebSocketOpenCallback(this, false, client_link_id);
+client_link_id = DRV::ESP32C3::LinkId0;</action>
+          <choice_glyph conn="277,252,4,1,-9,-105">
+           <action box="0,4,10,2"/>
+          </choice_glyph>
+         </choice>
+         <tran_glyph conn="293,252,1,-1,-16">
+          <action box="-11,-2,13,5"/>
+         </tran_glyph>
+        </tran>
+        <state name="Send_AT_WSCFG">
+         <entry brief="search socket id, send at command">commandParseResult = false;
+bool socketFound = GetFreeWsSocketId(&amp;client_link_id);
+
+
+/* see if there is a free link id (socket id)*/
+if(socketFound)
+{
+    if(ws_cfg_done[client_link_id] == true)
+    {
+        #if !Q_UTEST
+
+            QEvt *evt = Q_NEW(QEvt, ESP32C_OK_SIG);
+            this-&gt;POST(evt,this); 
+            TRACE_AO_ESP32C(&quot;Skip Config&quot;);
+        #endif
+    }
+    else
+    {
+        /* issue the at+cip start command */
+        init.esp-&gt;Send_AT_WSCFG( 
+                      client_link_id,
+                      ws_ping_interval_s,
+                      ws_ping_timeout_s );
+        m_timeEvt.disarm();
+        m_timeEvt.armX( ESP32C_WS_INTERVAL_MS,
+                        0);
+    }
+}else{
+   /* dispatch err sig*/
+#if !Q_UTEST
+   
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif
+}
+</entry>
+         <tran trig="ESP32C_OK">
+          <action>commandParseResult = true;
+ws_cfg_done[client_link_id] = true;</action>
+          <choice target="../../../2">
+           <guard brief="header_required">else</guard>
+           <choice_glyph conn="239,257,4,1,8,-4">
+            <action box="0,2,18,2"/>
+           </choice_glyph>
+          </choice>
+          <choice target="../../../3">
+           <guard brief="no_header_required">ws_header_len == 0</guard>
+           <choice_glyph conn="239,257,5,1,34,27,-10">
+            <action box="1,-2,23,2"/>
+           </choice_glyph>
+          </choice>
+          <tran_glyph conn="235,257,1,-1,4">
+           <action box="-10,-2,10,2"/>
+          </tran_glyph>
+         </tran>
+         <state_glyph node="210,250,25,9">
+          <entry box="1,2,22,5"/>
+         </state_glyph>
+        </state>
+        <state name="Send_AT_WSHEAD">
+         <entry brief="preare to send header">commandParseResult = false;
+TRACE_AO_ESP32C(&quot;Conf WS Header&quot;);
+/* issue the at+cip start command */
+init.esp-&gt;Send_AT_WSHEAD( 
+              ws_header_len);
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WS_INTERVAL_MS,
+                0);
+</entry>
+         <tran trig="ESP32C_OK">
+          <action>// parse the response, the response is the same as of AT+CIPSEND
+commandParseResult = init.esp-&gt;Parse_AT_CIPSEND();
+#if Q_UTEST
+    commandParseResult = true;
+#endif</action>
+          <choice target="../../../4">
+           <guard brief="ready to send header">true == commandParseResult</guard>
+           <action>TRACE_AO_ESP32C(&quot;Rdy to Send Header&quot;);</action>
+           <choice_glyph conn="220,269,5,3,20">
+            <action box="1,0,18,2"/>
+           </choice_glyph>
+          </choice>
+          <choice>
+           <guard>else</guard>
+           <action brief="dispatch error">#if !Q_UTEST
+   TRACE_AO_ESP32C(&quot;Bad Header Trans&quot;);
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif</action>
+           <choice_glyph conn="220,269,4,-1,4">
+            <action box="-1,3,18,2"/>
+           </choice_glyph>
+          </choice>
+          <tran_glyph conn="210,269,3,-1,10">
+           <action box="0,-2,10,2"/>
+          </tran_glyph>
+         </tran>
+         <state_glyph node="210,261,25,14">
+          <entry box="1,2,13,4"/>
+         </state_glyph>
+        </state>
+        <state name="Send_AT_WSOPEN">
+         <entry>commandParseResult = false;
+TRACE_AO_ESP32C(&quot;Prepare Open Ws&quot;);
+/* issue the at+cip start command */
+if(ws_sub_protocol_len &gt; 0)
+{
+    if(ws_auth_len&gt;0)
+    {
+        init.esp-&gt;Send_AT_WSOPEN(client_link_id,
+                     ws_uri, ws_sub_protocol, ws_auth );
+    }
+    else
+    {
+        init.esp-&gt;Send_AT_WSOPEN(client_link_id,
+                             ws_uri, ws_sub_protocol, nullptr );
+    }
+}else
+{
+    init.esp-&gt;Send_AT_WSOPEN(client_link_id,
+                         ws_uri, nullptr, nullptr );
+}
+
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WS_INTERVAL_MS,
+                    0);
+</entry>
+         <tran trig="ESP32C_OK">
+          <action>DRV::ESP32C3::LinkId link;
+commandParseResult = init.esp-&gt;Parse_AT_WSOPEN( &amp;link);
+TRACE_AO_ESP32C(&quot;WsOpenOk&quot;);</action>
+          <choice target="../../../../../7">
+           <guard brief="response ok">commandParseResult == true</guard>
+           <action brief="trigger callback">socket_status[client_link_id] = ESP32C_SOCKET_STATUS_WS_OPEN;
+timeout_counter = 0;
+AO_ESP32C_WebSocketOpenCallback(this, true, client_link_id);</action>
+           <choice_glyph conn="222,282,5,1,-50">
+            <action box="-19,-2,12,6"/>
+           </choice_glyph>
+          </choice>
+          <choice>
+           <guard>else</guard>
+           <action brief="dispatch ESP32C_ERR">#if !Q_UTEST
+
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+    TRACE_AO_ESP32C(&quot;Ws Open Err&quot;);
+#endif</action>
+           <choice_glyph conn="222,282,5,-1,12">
+            <action box="1,-2,24,4"/>
+           </choice_glyph>
+          </choice>
+          <tran_glyph conn="222,288,2,-1,-6">
+           <action box="0,-4,11,2"/>
+          </tran_glyph>
+         </tran>
+         <state_glyph node="210,277,53,11">
+          <entry box="1,2,6,2"/>
+         </state_glyph>
+        </state>
+        <state name="Send_Header">
+         <entry brief="Send header bytes">
+// reset api result buffer
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WIFI_CONN_INTERVAL_MS,
+                0);
+TRACE_AO_ESP32C(&quot;Deliver Header&quot;);
+init.esp-&gt;Send_WsHeader(ws_header);</entry>
+         <tran trig="ESP32C_OK" target="../../3">
+          <action>timeout_counter = 0;
+TRACE_AO_ESP32C(&quot;Header Deliver Ok&quot;);</action>
+          <tran_glyph conn="263,268,1,1,5,14,-5">
+           <action box="0,-2,10,2"/>
+          </tran_glyph>
+         </tran>
+         <state_glyph node="240,263,23,10">
+          <entry box="1,2,16,2"/>
+         </state_glyph>
+        </state>
+        <state_glyph node="207,245,86,46">
+         <exit box="1,2,6,2"/>
+        </state_glyph>
+       </state>
+       <state name="Websocket_SendState">
+        <exit>error_counter = 0;
+m_timeEvt.disarm();</exit>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <action>#if !Q_UTEST
+
+    AO_ESP32C_WebSocketSendCallback(this, false, client_link_id);
+    memset(rx_buffer, 0, sizeof(rx_buffer));
+    // Flush received data
+    init.esp-&gt;FlushRx();
+#endif</action>
+         <tran_glyph conn="208,232,3,1,-36">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK">
+         <action>commandParseResult = init.esp-&gt;Parse_AT_CIPSEND();
+#if Q_UTEST
+    commandParseResult = true;
+#endif</action>
+         <choice target="../../../9">
+          <guard brief="response ok">commandParseResult == true</guard>
+          <action>timeout_counter = 0;
+TRACE_AO_ESP32C(&quot;SendCmdOk&quot;);</action>
+          <choice_glyph conn="226,222,4,2,-8">
+           <action box="1,-2,10,2"/>
+          </choice_glyph>
+         </choice>
+         <choice>
+          <guard>else</guard>
+          <action brief="dispatch ESP32C_ERR">
+#if !Q_UTEST
+
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+    TRACE_AO_ESP32C(&quot;SndErr&quot;);
+#endif</action>
+          <choice_glyph conn="226,222,4,-1,5">
+           <action box="0,1,14,5"/>
+          </choice_glyph>
+         </choice>
+         <tran_glyph conn="221,238,2,-1,-16,5">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="208,217,61,21">
+         <exit box="1,2,6,2"/>
+        </state_glyph>
+       </state>
+       <state name="WebSocket_CloseState">
+        <exit brief="disarm timer, mark socket as closed">m_timeEvt.disarm();
+socket_status[client_close_id] = ESP32C_SOCKET_STATUS_CLOSE;
+AO_ESP32C_WebSocketCloseCallback(this, true,  client_close_id);</exit>
+        <tran trig="ESP32C_OK" target="../../../7">
+         <action>timeout_counter = 0;</action>
+         <tran_glyph conn="207,299,3,1,-35">
+          <action box="-10,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <tran_glyph conn="207,302,3,1,-35">
+          <action box="-10,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="207,294,24,14">
+         <exit box="1,2,19,5"/>
+        </state_glyph>
+       </state>
+       <state name="TransmitWebSocketDataState">
+        <entry brief="stream data to module">// reset api result buffer
+commandParseResult = false;
+// start timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_WIFI_CONN_INTERVAL_MS,
+                0);
+init.esp-&gt;SendWebSocketData(send_data_buffer);</entry>
+        <exit brief="disarm timer and trigger callback">m_timeEvt.disarm();
+
+error_counter = 0;</exit>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <action>#if !Q_UTEST
+
+    AO_ESP32C_WebSocketSendCallback(this, false, client_link_id);
+    
+    TRACE_AO_ESP32C(&quot;WsTxErr&quot;);
+#endif</action>
+         <tran_glyph conn="209,208,3,1,-37">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK" target="../../../7">
+         <action brief="parse_response">AO_ESP32C_WebSocketSendCallback(this,
+                                 true, 
+                                 client_link_id);
+
+timeout_counter = 0;
+TRACE_AO_ESP32C(&quot;Deliver PayLoadOk&quot;);</action>
+         <tran_glyph conn="209,211,3,1,-37">
+          <action box="-8,-2,13,4"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="209,199,60,15">
+         <entry box="1,2,21,2"/>
+         <exit box="1,4,33,2"/>
+        </state_glyph>
+       </state>
+       <state name="CreateServerState">
+        <entry brief="Set number of supported connections">// reset command result buffer
+commandParseResult = false;
+//send command to module
+init.esp-&gt;Send_AT_CIPSERVERMAXCONN(server_max_connections);
+// prepare timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_TIMEOUT_MS,
+                0);</entry>
+        <exit brief="disarm timer">m_timeEvt.disarm();
+</exit>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <action brief="trigger callback">AO_ESP32C_ServerOpenCallback(this, false);</action>
+         <tran_glyph conn="207,337,3,1,-35">
+          <action box="0,-2,26,2"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK" target="../2">
+         <action>m_timeEvt.disarm();</action>
+         <tran_glyph conn="207,343,3,3,16">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state name="open_server">
+         <entry brief="send AT+CIPSERVER">// reset command result buffer
+commandParseResult = false;
+//send command to module
+init.esp-&gt;Send_AT_CIPSERVER(DRV::ESP32C3::Create_Server, server_port);
+// prepare timeout timer
+m_timeEvt.disarm();
+m_timeEvt.armX( ESP32C_TIMEOUT_MS,
+                0);</entry>
+         <tran trig="ESP32C_OK">
+          <action brief="parse response">m_timeEvt.disarm();
+#if !Q_UTEST
+    commandParseResult = init.esp-&gt;Parse_AT_CIPSERVER();
+#else
+    commandParseResult = true;
+#endif</action>
+          <choice target="../../../../../7">
+           <guard brief="command successful">commandParseResult == true</guard>
+           <action brief="trigger callback">AO_ESP32C_ServerOpenCallback(this, true);
+error_counter = 0;
+timeout_counter = 0;</action>
+           <choice_glyph conn="245,347,4,1,-15,-73">
+            <action box="0,-4,28,4"/>
+           </choice_glyph>
+          </choice>
+          <choice>
+           <guard>else</guard>
+           <action brief="dispatch ESP32C_ERR">
+#if !Q_UTEST
+
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif</action>
+           <choice_glyph conn="245,347,4,-1,-2">
+            <action box="1,1,10,7"/>
+           </choice_glyph>
+          </choice>
+          <tran_glyph conn="223,347,3,-1,22">
+           <action box="0,-2,12,4"/>
+          </tran_glyph>
+         </tran>
+         <state_glyph node="223,338,30,14">
+          <entry box="1,2,20,3"/>
+         </state_glyph>
+        </state>
+        <state_glyph node="207,328,47,32">
+         <entry box="1,2,23,2"/>
+         <exit box="1,4,23,2"/>
+        </state_glyph>
+       </state>
+       <state name="UdpListenCommandState">
+        <entry brief="Send the AT CIPSTART command with UDP">client_link_id = DRV::ESP32C3::LinkId0;
+if(GetFreeSocketId(&amp;client_link_id))
+{
+    /* issue the at+cip start command */
+    init.esp-&gt;Send_AT_CIPSTART(client_link_id,
+                         DRV::ESP32C3::UDP,
+                         remote_address,
+                         udp_remote_port,
+                         udp_local_port);
+    m_timeEvt.disarm();
+    m_timeEvt.armX( ESP32C_TCP_INTERVAL_MS,
+                    0);
+}else{
+   /* dispatch err sig*/
+#if !Q_UTEST
+   
+   QEvt *evt = Q_NEW(QEvt, ESP32C_ERR_SIG);
+   this-&gt;POST(evt,this); 
+
+#endif
+}</entry>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <tran_glyph conn="207,322,3,1,-35">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_OK" target="../../../7">
+         <action>m_timeEvt.disarm();
+socket_status[client_link_id] = ESP32C_SOCKET_STATUS_OPEN;
+timeout_counter = 0;
+AO_ESP32C_UdpSocketOpenCallback(this, true, client_link_id );</action>
+         <tran_glyph conn="207,325,3,1,-35">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="207,315,47,11">
+         <entry box="1,2,36,2"/>
+        </state_glyph>
+       </state>
+       <state name="ConnectionCheckState">
+        <exit brief="re-arm connection check timer on exit, disarm command timer">m_connectionCheckTimeEvt.disarm();
+m_timeEvt.disarm();
+m_connectionCheckTimeEvt.armX( ESP32C_AO_CONNECTION_CHECK_PERIOD_MS,
+                0);</exit>
+        <tran trig="ESP32C_OK">
+         <action brief="check connection state result">#if !Q_UTEST
+    DRV::ESP32C3::ConnectionState_t conn;
+    commandParseResult = init.esp-&gt;Parse_AT_CWSTATE(&amp;conn);
+    if(true == commandParseResult &amp;&amp; conn != DRV::ESP32C3::Connected_IpObtained)
+    {
+       TRACE_AO_ESP32C(&quot;ChkWifiAPDisconn&quot;);
+
+       AO_ESP32C_WifiDisconnectionCallback(this, true);
+       commandParseResult = false;
+    }else if(!commandParseResult)
+    {
+        TRACE_AO_ESP32C(&quot;WrngChk&quot;);
+    }
+#else
+    commandParseResult = true;
+#endif</action>
+         <choice target="../../../../7">
+          <guard brief="connection OK">true == commandParseResult</guard>
+          <choice_glyph conn="242,95,5,1,-70">
+           <action box="-24,-2,18,2"/>
+          </choice_glyph>
+         </choice>
+         <choice>
+          <guard>else</guard>
+          <choice_glyph conn="242,95,4,-1,-5">
+           <action box="0,-4,17,2"/>
+          </choice_glyph>
+         </choice>
+         <tran_glyph conn="264,95,1,-1,-22">
+          <action box="0,-2,24,4"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="ESP32C_ERR" target="../../../7">
+         <tran_glyph conn="205,98,3,1,-33">
+          <action box="0,-2,10,2"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="205,86,59,13">
+         <exit box="1,2,32,4"/>
+        </state_glyph>
+       </state>
+       <state_glyph node="201,60,95,331"/>
+      </state>
+      <state_glyph node="62,24,240,432">
+       <entry box="1,2,40,2"/>
+      </state_glyph>
+     </state>
+     <state name="Base_ConfigState">
+      <entry brief="restore connection info buffer, disable urc readiness, empty the defer queue">for(uint8_t i = 0; i&lt;(uint8_t)DRV::ESP32C3::LinkIdMax; i++)
+{
+    socket_status[i] = ESP32C_SOCKET_STATUS_CLOSE;
+}
+for(uint8_t i = 0; i&lt;ESP32C3_MAX_WS_SOCKET; i++)
+{
+    ws_cfg_done[i] = false;
+}
+hotspot_active = false;
+init.esp-&gt;SetUrcReadiness(false);
+// empty the defer queue
+bool recalled = this-&gt;recall(init.deferQueue);
+while(recalled)
+{
+  recalled = this-&gt;recall(init.deferQueue);
+}</entry>
+      <initial target="../8">
+       <initial_glyph conn="29,23,4,0,7">
+        <action box="0,-2,10,2"/>
+       </initial_glyph>
+      </initial>
+      <tran trig="ESP32C_ERR" target="../8">
+       <action brief="disarm one shot timeout timer">m_timeEvt.disarm();</action>
+       <tran_glyph conn="4,24,3,3,2,10,7">
+        <action box="2,1,18,4"/>
+       </tran_glyph>
+      </tran>
+      <state name="SendAT">
+       <entry brief="Send At base command to see if the module is responsive">init.esp-&gt;Send_AT();
+m_timeEvt.armX( ESP32C_TIMEOUT_MS,
+                0);</entry>
+       <tran trig="ESP32C_OK" target="../../7">
+        <action brief="disarm timer">m_timeEvt.disarm();</action>
+        <tran_glyph conn="45,55,1,1,4,7,-4">
+         <action box="0,-2,22,3"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="TIMEOUT" target="../..">
+        <tran_glyph conn="13,53,3,3,-9">
+         <action box="-7,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="13,48,32,9">
+        <entry box="1,2,29,4"/>
+       </state_glyph>
+      </state>
+      <state name="SetMode">
+       <entry brief="Send the at+CWMODE command to set if module is AP, Station or both">init.esp-&gt;Send_AT_CWMODE(mode);
+m_timeEvt.armX( ESP32C_TIMEOUT_MS,
+                0);</entry>
+       <exit>TRACE_AO_ESP32C(&quot;MODECONFEXT&quot;);</exit>
+       <tran trig="ESP32C_OK" target="../../../6">
+        <action brief="disarm one shot timeout timer">m_timeEvt.disarm();
+init.esp-&gt;SetUrcReadiness(true);
+TRACE_AO_ESP32C(&quot;MODECONFTRAN&quot;);
+AO_ESP32C_ConfigCompleteCallback(this);
+timeout_counter = 0;</action>
+        <tran_glyph conn="45,103,1,3,17">
+         <action box="0,-2,13,6"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="TIMEOUT" target="../..">
+        <tran_glyph conn="13,99,3,3,-9">
+         <action box="-7,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="13,93,32,11">
+        <entry box="1,2,30,5"/>
+        <exit box="1,7,6,2"/>
+       </state_glyph>
+      </state>
+      <state name="ResetEnd">
+       <entry brief="Finish reset procedure">init.esp-&gt;StopReset();
+// and periodically every 1 second
+m_timeEvt.armX( ESP32C_RESET_INTERVAL_MS,
+                0);</entry>
+       <tran trig="TIMEOUT" target="../../2">
+        <action brief="disarm timer">m_timeEvt.disarm();</action>
+        <tran_glyph conn="45,44,1,1,4,5,-4">
+         <action box="0,-2,18,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="13,39,32,7">
+        <entry box="1,2,17,4"/>
+       </state_glyph>
+      </state>
+      <state name="SendCIPMUX">
+       <entry brief="send AT+CIPMUX enable multiple connections">init.esp-&gt;Send_AT_CIPMUX(true);
+m_timeEvt.armX( ESP32C_TIMEOUT_MS,
+                0);</entry>
+       <tran trig="ESP32C_OK" target="../../3">
+        <action brief="disarm timer">m_timeEvt.disarm();</action>
+        <tran_glyph conn="45,90,1,1,4,5,-4">
+         <action box="0,-2,20,3"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="TIMEOUT" target="../..">
+        <tran_glyph conn="13,87,3,3,-9">
+         <action box="-7,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="13,83,32,9">
+        <entry box="1,2,20,4"/>
+       </state_glyph>
+      </state>
+      <state name="Disconnect">
+       <entry brief="Send AT+CWQAP: Disconnect from any AP.">init.esp-&gt;Send_AT_CWQAP();
+m_timeEvt.armX( ESP32C_TIMEOUT_MS,
+                0);</entry>
+       <tran trig="ESP32C_OK" target="../../5">
+        <action>m_timeEvt.disarm();</action>
+        <tran_glyph conn="44,78,1,1,5,7,-4">
+         <action box="0,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="TIMEOUT" target="../..">
+        <tran_glyph conn="13,76,3,3,-9">
+         <action box="-8,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_ERR" target="../../5">
+        <action>m_timeEvt.disarm();</action>
+        <tran_glyph conn="42,80,2,0,3">
+         <action box="0,0,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="13,71,31,9">
+        <entry box="1,2,30,4"/>
+       </state_glyph>
+      </state>
+      <state name="SendAT_SYSTORE">
+       <entry brief="send command to avoid storing configuration data on esp32c">init.esp-&gt;Send_AT_SYSSTORE(false);
+m_timeEvt.armX( ESP32C_TIMEOUT_MS,
+                0);</entry>
+       <tran trig="TIMEOUT" target="../..">
+        <tran_glyph conn="13,64,3,3,-9">
+         <action box="-8,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="ESP32C_OK" target="../../6">
+        <action>m_timeEvt.disarm();</action>
+        <tran_glyph conn="45,67,1,1,4,6,-5">
+         <action box="0,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="13,59,32,11">
+        <entry box="1,2,30,6"/>
+       </state_glyph>
+      </state>
+      <state name="ResetStart">
+       <entry brief="Start reset of the module">init.esp-&gt;StartReset();
+m_timeEvt.disarm();
+// and periodically every 1 second
+m_timeEvt.armX( ESP32C_RESET_INTERVAL_MS,
+                0);</entry>
+       <tran trig="TIMEOUT" target="../../4">
+        <action brief="disarm timer">m_timeEvt.disarm();</action>
+        <tran_glyph conn="46,33,1,1,3,8,-4">
+         <action box="0,-2,18,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="13,30,33,7">
+        <entry box="1,2,23,2"/>
+       </state_glyph>
+      </state>
+      <state_glyph node="4,15,51,90">
+       <entry box="1,2,45,4"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="1,5,305,456"/>
+    </state>
+    <state_diagram size="311,588"/>
+   </statechart>
+  </class>
+  <class name="AO_ESP32C_StartEvent" superclass="qpcpp::QEvt">
+   <attribute name="mode" type="DRV::ESP32C3::WiFiMode" visibility="0x00" properties="0x00"/>
+  </class>
+  <class name="CloseSocketEvt" superclass="qpcpp::QEvt">
+   <documentation>///@brief event to relay the closure of a socket</documentation>
+   <attribute name="socket_id" type="DRV::ESP32C3::LinkId" visibility="0x00" properties="0x00">
+    <documentation>///@brief socket id to be closed</documentation>
+    <code>= DRV::ESP32C3::LinkId0;</code>
+   </attribute>
+  </class>
+  <class name="SendDataEvt" superclass="qpcpp::QEvt">
+   <documentation>///@brief event to send data</documentation>
+   <attribute name="data[ESP32C_TX_BUFFER_LEN]" type="uint8_t" visibility="0x00" properties="0x00">
+    <code>={0};</code>
+   </attribute>
+   <attribute name="length" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="socket_id" type="DRV::ESP32C3::LinkId" visibility="0x00" properties="0x00"/>
+   <attribute name="opcode" type="DRV::ESP32C3::WebSockedtOpCode_t" visibility="0x00" properties="0x00"/>
+  </class>
+  <class name="OpenTcpSocketEvt" superclass="qpcpp::QEvt">
+   <attribute name="address[ADDRESS_LEN_MAX]" type="uint8_t" visibility="0x00" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="port" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+  </class>
+  <class name="OpenWsSocketEvt" superclass="qpcpp::QEvt">
+   <attribute name="ws_uri[ESP32C_URI_MAX_LEN]" type="uint8_t" visibility="0x00" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_uri_len" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_ping_timeout_s" type="uint32_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_ping_interval_s" type="uint32_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_header[ESP32C3_WS_HEADER_MAX_LEN]" type="uint8_t" visibility="0x00" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_header_len" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_auth[ESP32C_URI_MAX_LEN]" type="uint8_t" visibility="0x00" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_auth_len" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+   <attribute name="ws_sub_protocol[ESP32C_URI_MAX_LEN]" type="uint8_t" visibility="0x00" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="ws_sub_protocol_len" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>= 0;</code>
+   </attribute>
+  </class>
+  <class name="ConnectApEvt" superclass="qpcpp::QEvt">
+   <attribute name="ssid[SSID_MAX_LEN]" type="uint8_t" visibility="0x00" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+   <attribute name="pwd[PWD_MAX_LEN]" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>= {0};</code>
+   </attribute>
+  </class>
+ </package>
+ <directory name=".">
+  <file name="AO_ESP32C.cpp">
+   <text>
+#include &quot;AO_ESP32C.hpp&quot;
+#include &quot;Components.h&quot;
+#include &quot;Debug_Print.hpp&quot;
+
+using namespace QP;
+using namespace DRV;
+
+// weak callbacks implementation
+__attribute__((weak)) void AO_ESP32C_ConfigCompleteCallback(AO::AO_ESP32C* caller)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_WifiConnectCallback(AO::AO_ESP32C* caller, bool result)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_HotspotOpenCallback(AO::AO_ESP32C* caller, bool result)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_TcpSocketOpenCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_UdpSocketOpenCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id)
+{;}
+__attribute__((weak)) void AO_ESP32C_ServerTcpSocketOpen(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_TcpSocketCloseCallback(AO::AO_ESP32C* caller, bool result,  DRV::ESP32C3::LinkId socket_id)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_ReadCompleteCallback(AO::AO_ESP32C* caller, bool result)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_ServerOpenCallback(AO::AO_ESP32C* caller, bool result)
+{ ;}
+__attribute__((weak)) void AO_ESP32C_SendDataCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id)
+{;}
+__attribute__((weak)) void AO_ESP32C_SocketDataReceiveCallback(AO::AO_ESP32C* caller, bool result,  DRV::ESP32C3::LinkId socket_id, uint8_t* data, uint32_t length)
+{;}
+__attribute__((weak)) void AO_ESP32C_HotspotClientConnectionCallback(AO::AO_ESP32C* caller, bool result)
+{;}
+__attribute__((weak)) void AO_ESP32C_HotspotClientDisconnectionCallback(AO::AO_ESP32C* caller, bool result)
+{;}
+__attribute__((weak)) void AO_ESP32C_WifiDisconnectionCallback(AO::AO_ESP32C* caller, bool result)
+{;}
+__attribute__((weak)) void AO_ESP32C_IpAssignedCallback(AO::AO_ESP32C* caller, bool result)
+{;}
+__attribute__((weak)) void AO_ESP32C_HotspotIpAssignedCallback(AO::AO_ESP32C* caller, bool result)
+{;}
+__attribute__((weak)) void AO_ESP32C_WebSocketOpenCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id)
+{;}
+__attribute__((weak)) void AO_ESP32C_WebSocketSendCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id)
+{;}
+__attribute__((weak)) void AO_ESP32C_TimeoutModuleUnresponsiveCallback(AO::AO_ESP32C* caller)
+{;}
+__attribute__((weak)) void AO_ESP32C_WebSocketCloseCallback(AO::AO_ESP32C* caller, bool result,  DRV::ESP32C3::LinkId socket_id)
+{;}
+__attribute__((weak)) void AO_ESP32C_WebSocketDataReceiveCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id,  uint8_t* data, uint32_t length)
+{;}
+
+// opaque pointer to the Blinky active object --------------------------------
+$define${AOs::CloseSocketEvt}
+$define${AOs::AO_ESP32C_StartEvent}
+
+$define${AOs::AO_ESP32C}
+
+</text>
+  </file>
+  <file name="AO_ESP32C.hpp">
+   <text>#ifndef AO_ESP32C_H
+#define AO_ESP32C_H
+
+#include &quot;ESP32C.hpp&quot;
+#include &quot;qpcpp.hpp&quot; // QP/C++ framework API
+#include &quot;Signals.hpp&quot;
+#include &quot;BSP_QP.hpp&quot;
+#include &quot;Debug_Print.hpp&quot;
+#include &quot;string.h&quot;
+
+#define PWD_MAX_LEN 64
+#define SSID_MAX_LEN 64
+#define ESP32C_RESET_INTERVAL_MS 1500
+#define ESP32C_WIFI_CONN_INTERVAL_MS 25000
+#define ESP32C_TIMEOUT_MS 5000
+#define ESP32C_UNSOLICITED_TIMEOUT_MS 25
+#define ESP32C_INCOMING_DATA_CHECK_PERIOD_MS 100
+#define ESP32C_TCP_INTERVAL_MS 15000
+#define ESP32C_RETRY_MAX 2
+#define ADDRESS_LEN_MAX 100
+#define ESP32C_URI_MAX_LEN 256
+#define ESP32C_TX_BUFFER_LEN 2048
+#define ESP32C3_WS_HEADER_MAX_LEN 128
+#define ESP32C_WS_INTERVAL_MS  (ESP32C_TCP_INTERVAL_MS)
+#define ESP32C_TIMEOUT_COUNT_MAX 10
+#define ESP32C_AO_MAX_DEFERRED_EVENTS 32
+#define ESP32C_AO_CONNECTION_CHECK_PERIOD_MS (10000)
+
+#define ESP32C_SOCKET_STATUS_CLOSE       0 ///&lt; socket close
+#define ESP32C_SOCKET_STATUS_OPEN        1 ///&lt; tcp socket open
+#define ESP32C_SOCKET_STATUS_WS_OPEN     2 ///&lt; websocket open
+#define ESP32C_SOCKET_STATUS_SERVER_OPEN 3 ///&lt; socket opened when esp32c3 acts as server
+$declare${AOs::CloseSocketEvt}
+$declare${AOs::AO_ESP32C_StartEvent}
+$declare${AOs::SendDataEvt}
+$declare${AOs::OpenTcpSocketEvt}
+$declare${AOs::OpenWsSocketEvt}
+$declare${AOs::ConnectApEvt}
+namespace AO
+{
+    typedef struct 
+    {
+        DRV::ESP32C3* esp;
+        //QEQueue requestQueue; /* native QF queue for deferred request events */
+        //QEvent const *requestQSto[3]; /* storage for the deferred queue buffer */
+        QP::QEQueue* deferQueue;
+    }ESP32C_Init_t;
+};
+
+// ask QM to declare the AO_ESP32C class ----------------------------------------
+
+$declare${AOs::AO_ESP32C}
+
+// callbacks
+void AO_ESP32C_SocketDataReceiveCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id,  uint8_t* data, uint32_t length);
+void AO_ESP32C_HotspotOpenCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_HotspotClientConnectionCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_HotspotClientDisconnectionCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_SendDataCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_WifiConnectCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_WifiDisconnectionCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_TcpSocketOpenCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_UdpSocketOpenCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_TcpSocketCloseCallback(AO::AO_ESP32C* caller, bool result,  DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_ReadCompleteCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_ConfigCompleteCallback(AO::AO_ESP32C* caller);
+void AO_ESP32C_ServerOpenCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_IpAssignedCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_HotspotIpAssignedCallback(AO::AO_ESP32C* caller, bool result);
+void AO_ESP32C_ServerTcpSocketOpen(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_WebSocketOpenCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_WebSocketCloseCallback(AO::AO_ESP32C* caller, bool result,  DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_WebSocketSendCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id);
+void AO_ESP32C_WebSocketDataReceiveCallback(AO::AO_ESP32C* caller, bool result, DRV::ESP32C3::LinkId socket_id,  uint8_t* data, uint32_t length);
+void AO_ESP32C_TimeoutModuleUnresponsiveCallback(AO::AO_ESP32C* caller);
+#endif // BSP_HPP</text>
+  </file>
+  <file name="AO_ESP32C_Signals.h">
+   <text>#ifndef __AOESP32CSIGNALS_HP
+#define __AOESP32CSIGNALS_HP
+
+#define FOREACH_ESP32C_SIGNALS(MACRO)             \
+                         MACRO(      ESP32C_OK_SIG                )\
+                         MACRO(      ESP32C_ERR_SIG               )\
+                         MACRO(      ESP32C_START_SIG             )\
+                         MACRO(      ESP32C_TCP_CONNECT_SIG       )\
+                         MACRO(      ESP32C_UDP_CONNECT_SIG       )\
+                         MACRO(      ESP32C_CLOSE_SOCKET_SIG      )\
+                         MACRO(      ESP32C_READ_DATA_SIG         )\
+                         MACRO(      ESP32C_SEND_DATA_SIG         )\
+                         MACRO(      ESP32C_OPEN_SERVER_SIG       )\
+                         MACRO(      ESP32C_HOTSPOT_CONFIG_SIG    )\
+                         MACRO(      ESP32C_DATA_RECEIVE_CHECK_SIG  )\
+                         MACRO(      ESP32C_UNSOLICITED_STA_SIG     )\
+                         MACRO(      ESP32C_UNSOLICITED_END_SIG     )\
+                         MACRO(      ESP32C_UNSOLICITED_TIMEOUT_SIG )\
+                         MACRO(      ESP32C_WEBSOCKET_OPEN_SIG      )\
+                         MACRO(      ESP32C_WEBSOCKET_CLOSE_SIG     )\
+                         MACRO(      ESP32C_WEBSOCKET_SEND_DATA_SIG )\
+                         MACRO(      ESP32C_CONNECTION_CHECK_SIG    )\
+                         MACRO(      ESP32C_CONNECT_WIFI_SIG        )
+
+#define __ESP32C_SIGNAL_DEF(SIG)      SIG 
+#define __ESP32C_SIGNAL_ENUM(SIG)     SIG, 
+#define ESP32C_SIGNALS_DEF     FOREACH_ESP32C_SIGNALS(__ESP32C_SIGNAL_DEF)
+#define ESP32C_SIGNALS_ENUM    FOREACH_ESP32C_SIGNALS(__ESP32C_SIGNAL_ENUM)
+#endif</text>
+  </file>
+ </directory>
+</model>
